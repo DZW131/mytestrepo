@@ -54,9 +54,20 @@ def synchronize(device):
         torch.cuda.synchronize(device)
 
 
-def profile(rectifier, device, batch_size, image_size, warmup, iterations):
+def profile(
+    rectifier,
+    device,
+    batch_size,
+    image_size,
+    warmup,
+    iterations,
+    hst_variant="a1",
+):
     torch.manual_seed(42)
-    model = Net(n_class=4, rectifier_type=rectifier).to(device)
+    model_kwargs = {"rectifier_type": rectifier}
+    if rectifier == "hst":
+        model_kwargs["hst_config"] = {"variant": hst_variant}
+    model = Net(n_class=4, **model_kwargs).to(device)
     model.eval()
     sample = torch.randn(batch_size, 3, image_size, image_size, device=device)
 
@@ -85,6 +96,7 @@ def profile(rectifier, device, batch_size, image_size, warmup, iterations):
 
     return {
         "rectifier": rectifier,
+        "hst_variant": hst_variant if rectifier == "hst" else None,
         "parameters": sum(parameter.numel() for parameter in model.parameters()),
         "rectifier_parameters": sum(
             parameter.numel()
@@ -106,6 +118,7 @@ def main():
     parser.add_argument("--image_size", default=224, type=int)
     parser.add_argument("--warmup", default=10, type=int)
     parser.add_argument("--iterations", default=30, type=int)
+    parser.add_argument("--hst_variant", default="a1", choices=["a1", "a2"])
     args = parser.parse_args()
 
     device = torch.device(args.device)
@@ -117,6 +130,7 @@ def main():
             args.image_size,
             args.warmup,
             args.iterations,
+            args.hst_variant,
         )
         for rectifier in ("hfrm", "hst")
     ]
@@ -125,6 +139,7 @@ def main():
         "device": str(device),
         "batch_size": args.batch_size,
         "image_size": args.image_size,
+        "hst_variant": args.hst_variant,
         "flop_scope": "Conv2d and Linear only; one multiply-add counts as 2 FLOPs",
         "results": results,
         "hst_vs_hfrm_percent": {

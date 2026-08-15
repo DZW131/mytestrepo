@@ -1,4 +1,4 @@
-"""A1 progressive-only Hierarchical Semantic Transition rectifier."""
+"""A1/A2 Hierarchical Semantic Transition rectifier."""
 
 from dataclasses import dataclass
 from typing import Any, Dict, Mapping, Optional
@@ -7,22 +7,40 @@ import torch
 import torch.nn as nn
 
 from .context import apply_contextual_homogenization, build_context_conv
+from .latent_interaction import HierarchicalLatentInteraction
 from .semantic_projector import HierarchySemanticProjector
+from .transition_block import StageSemanticTransition
 
 
 @dataclass(frozen=True)
 class HSTConfig:
-    """Single source of truth for the currently validated HST milestone."""
+    """Single source of truth for the currently validated HST milestones."""
 
     variant: str = "a1"
     latent_dim: int = 256
     context_kernel: int = 15
+    transition_enabled: Optional[bool] = None
+    hli_mode: str = "identity"
 
     def __post_init__(self) -> None:
-        if self.variant.lower() != "a1":
+        normalized_variant = self.variant.lower()
+        if normalized_variant not in {"a1", "a2"}:
             raise ValueError(
-                "Only the progressive-only A1 variant is implemented in this milestone; "
+                "HST variant must be 'a1' or 'a2'; "
                 f"got {self.variant!r}."
+            )
+        object.__setattr__(self, "variant", normalized_variant)
+
+        transition_enabled = self.transition_enabled
+        if transition_enabled is None:
+            transition_enabled = normalized_variant == "a2"
+        if normalized_variant == "a1" and transition_enabled:
+            raise ValueError("A1 cannot enable stage-specific transitions")
+        object.__setattr__(self, "transition_enabled", transition_enabled)
+
+        if self.hli_mode != "identity":
+            raise ValueError(
+                "A1/A2 require hli_mode='identity'; the MLP mixer belongs to A3"
             )
         if self.latent_dim <= 0:
             raise ValueError(f"latent_dim must be positive, got {self.latent_dim}")
@@ -50,8 +68,9 @@ class HSTRectifier(nn.Module):
     """Progress correction states from deep to stage3, stage2, and stage1.
 
     A1 deliberately copies the parent correction state at each step.  It does
-    not use a transition MLP or latent token mixer.  Stage-specific gate heads
-    still allow each hierarchy to decode the shared correction state into its
+    not instantiate a transition MLP or latent token mixer. A2 retains identity
+    latent interaction and applies a target-conditioned residual transition at
+    each stage. Stage-specific gate heads decode each correction state into its
     own channel space.
     """
 
@@ -101,10 +120,25 @@ class HSTRectifier(nn.Module):
             {stage: nn.Parameter(torch.zeros(1)) for stage in self.top_down_stages}
         )
 
+        if self.config.variant == "a2":
+            self.latent_interaction = HierarchicalLatentInteraction(
+                latent_dim=latent_dim,
+                mode=self.config.hli_mode,
+            )
+            self.transitions = nn.ModuleDict(
+                {
+                    stage: StageSemanticTransition(latent_dim)
+                    for stage in self.top_down_stages
+                }
+            )
+
     def residual_scale_parameters(self):
         """Scalars not owned by Conv/Linear/Norm modules for optimizer grouping."""
         yield from self.gamma_sem.values()
         yield from self.gamma_ctx.values()
+        if hasattr(self, "transitions"):
+            for transition in self.transitions.values():
+                yield transition.rho
 
     def forward(
         self,
@@ -112,7 +146,7 @@ class HSTRectifier(nn.Module):
         feat_stage2: torch.Tensor,
         feat_stage3: torch.Tensor,
         feat_deep: torch.Tensor,
-    ) -> Dict[str, Dict[str, torch.Tensor]]:
+    ) -> Dict[str, Any]:
         base_features = {
             "stage1": feat_stage1,
             "stage2": feat_stage2,
@@ -121,10 +155,33 @@ class HSTRectifier(nn.Module):
         }
         self._validate_features(base_features)
 
-        descriptors = {
+        raw_descriptors = {
             stage: self.semantic_projectors[stage](feature)
             for stage, feature in base_features.items()
         }
+
+        raw_latent_tokens = torch.stack(
+            [
+                raw_descriptors["deep"],
+                raw_descriptors["stage3"],
+                raw_descriptors["stage2"],
+                raw_descriptors["stage1"],
+            ],
+            dim=1,
+        )
+        if self.config.variant == "a2":
+            latent_tokens = self.latent_interaction(raw_latent_tokens)
+            descriptors = {
+                "deep": latent_tokens[:, 0],
+                "stage3": latent_tokens[:, 1],
+                "stage2": latent_tokens[:, 2],
+                "stage1": latent_tokens[:, 3],
+            }
+        else:
+            # Preserve the A1 computational graph: target descriptors remain
+            # diagnostics-only until A2 transitions consume them.
+            latent_tokens = raw_latent_tokens
+            descriptors = raw_descriptors
 
         correction_states = {
             "deep": self.deep_state_initializer(descriptors["deep"])
@@ -133,12 +190,21 @@ class HSTRectifier(nn.Module):
         semantic_features: Dict[str, torch.Tensor] = {}
         context_features: Dict[str, torch.Tensor] = {}
         rectified_features: Dict[str, torch.Tensor] = {"deep": feat_deep}
+        transition_deltas: Dict[str, torch.Tensor] = {}
 
         parent_state = correction_states["deep"]
         for stage in self.top_down_stages:
-            # A1 progressive-only: propagate the correction state itself, with
-            # no target-conditioned transition and no raw feature cascade.
-            current_state = parent_state
+            if self.config.transition_enabled:
+                current_state, transition_delta = self.transitions[stage](
+                    parent_state,
+                    descriptors[stage],
+                    return_delta=True,
+                )
+                transition_deltas[stage] = transition_delta
+            else:
+                # A1/control path: propagate the correction state itself, with
+                # no target-conditioned transition and no raw feature cascade.
+                current_state = parent_state
             correction_states[stage] = current_state
 
             gate = torch.sigmoid(self.semantic_gates[stage](current_state))
@@ -161,8 +227,19 @@ class HSTRectifier(nn.Module):
 
         return {
             "base_features": base_features,
+            "raw_semantic_descriptors": raw_descriptors,
             "semantic_descriptors": descriptors,
+            "latent_tokens": latent_tokens,
             "correction_states": correction_states,
+            "transition_deltas": transition_deltas,
+            "transition_scales": (
+                {
+                    stage: transition.rho
+                    for stage, transition in self.transitions.items()
+                }
+                if hasattr(self, "transitions")
+                else {}
+            ),
             "semantic_gates": semantic_gates,
             "semantic_features": semantic_features,
             "context_features": context_features,
