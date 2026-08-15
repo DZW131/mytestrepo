@@ -70,12 +70,18 @@ def profile(rectifier, device, batch_size, image_size, warmup, iterations):
         for _ in range(warmup):
             model(sample)
         synchronize(device)
+        if device.type == "cuda":
+            torch.cuda.reset_peak_memory_stats(device)
         timings_ms = []
         for _ in range(iterations):
             start = time.perf_counter()
             model(sample)
             synchronize(device)
             timings_ms.append((time.perf_counter() - start) * 1000.0)
+
+    peak_cuda_memory = (
+        torch.cuda.max_memory_allocated(device) if device.type == "cuda" else None
+    )
 
     return {
         "rectifier": rectifier,
@@ -89,9 +95,7 @@ def profile(rectifier, device, batch_size, image_size, warmup, iterations):
         "conv_linear_flops_per_image": 2.0 * counter.macs / batch_size,
         "latency_ms_batch_median": statistics.median(timings_ms),
         "latency_ms_batch_mean": statistics.mean(timings_ms),
-        "peak_cuda_memory_bytes": (
-            torch.cuda.max_memory_allocated(device) if device.type == "cuda" else None
-        ),
+        "peak_cuda_memory_bytes": peak_cuda_memory,
     }
 
 
