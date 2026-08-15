@@ -3,7 +3,10 @@ import unittest
 import torch
 
 from network.hst.hst_rectifier import HSTConfig, HSTRectifier
-from network.hst.transition_block import StageSemanticTransition
+from network.hst.transition_block import (
+    OFFICIAL_A2_RHO_INIT,
+    StageSemanticTransition,
+)
 from network.resnet38_cls import Net
 from tests.test_hst_a1 import make_features
 
@@ -25,6 +28,8 @@ class StageSemanticTransitionTest(unittest.TestCase):
         transition = StageSemanticTransition(latent_dim=8)
         parent = torch.randn(3, 8)
         target = torch.randn(3, 8)
+        with torch.no_grad():
+            transition.rho.zero_()
 
         current, delta = transition(parent, target, return_delta=True)
 
@@ -32,6 +37,12 @@ class StageSemanticTransitionTest(unittest.TestCase):
         self.assertTrue(torch.isfinite(delta).all())
         self.assertEqual(transition.rho.item(), 0.0)
         self.assertTrue(torch.equal(current, parent))
+
+    def test_official_a2_rho_initialization_is_fixed(self):
+        transition = StageSemanticTransition(latent_dim=8)
+        self.assertAlmostEqual(
+            transition.rho.item(), OFFICIAL_A2_RHO_INIT, places=7
+        )
 
     def test_residual_update_matches_formula(self):
         torch.manual_seed(2)
@@ -85,6 +96,9 @@ class HSTA2IntegrationTest(unittest.TestCase):
                 for key in incompatible.missing_keys
             )
         )
+        with torch.no_grad():
+            for transition in a2.transitions.values():
+                transition.rho.zero_()
 
         features = make_features(batch_size=2)
         with torch.no_grad():
@@ -122,6 +136,16 @@ class HSTA2IntegrationTest(unittest.TestCase):
                 )
             )
             self.assertEqual(a2.transitions[stage].rho.item(), 0.0)
+
+    def test_official_a2_initialization_keeps_gamma_zero_and_rho_nonzero(self):
+        rectifier = HSTRectifier(HSTConfig(variant="a2"))
+        for stage in rectifier.top_down_stages:
+            self.assertEqual(rectifier.gamma_sem[stage].item(), 0.0)
+            self.assertAlmostEqual(
+                rectifier.transitions[stage].rho.item(),
+                OFFICIAL_A2_RHO_INIT,
+                places=7,
+            )
 
     def test_disabled_a2_transition_is_strict_a1_control(self):
         torch.manual_seed(9)

@@ -6,12 +6,15 @@ import torch
 import torch.nn as nn
 
 
+OFFICIAL_A2_RHO_INIT = 0.01
+
+
 class StageSemanticTransition(nn.Module):
     """Update a parent correction state using the target hierarchy descriptor.
 
-    The residual scale ``rho`` is initialized to zero. Therefore an enabled A2
-    block is exactly equivalent to A1 at initialization while retaining a
-    learnable path toward stage-specific correction states.
+    The learnable residual scale ``rho`` uses the fixed official A2 training
+    initialization of 0.01. Setting ``rho`` to zero remains an exact A1
+    degeneration control.
     """
 
     def __init__(self, latent_dim: int = 256):
@@ -25,7 +28,7 @@ class StageSemanticTransition(nn.Module):
             nn.GELU(),
             nn.Linear(2 * latent_dim, latent_dim),
         )
-        self.rho = nn.Parameter(torch.zeros(1))
+        self.rho = nn.Parameter(torch.full((1,), OFFICIAL_A2_RHO_INIT))
 
     def forward(
         self,
