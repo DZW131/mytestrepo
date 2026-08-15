@@ -1,4 +1,5 @@
 import unittest
+from types import SimpleNamespace
 
 import torch
 
@@ -7,6 +8,7 @@ from network.hst.latent_interaction import HierarchicalLatentInteraction
 from network.resnet38_cls import Net
 from tests.test_hst_a1 import make_features
 from tests.test_hst_a2 import gradient_is_finite_and_nonzero
+from train_sshr import get_model_kwargs
 
 
 A2_PARAMETER_COUNT = 109_505_621
@@ -57,6 +59,20 @@ class HSTA3IntegrationTest(unittest.TestCase):
             HSTConfig(variant="a2", hli_mode="mlp")
         with self.assertRaises(ValueError):
             HSTConfig(variant="a3", transition_enabled=False)
+
+    def test_training_manifest_resolves_official_a3_defaults(self):
+        args = SimpleNamespace(
+            rectifier="hst",
+            hst_variant="a3",
+            hst_latent_dim=256,
+            hst_context_kernel=15,
+            hst_transition_enabled=None,
+            hst_hli_mode=None,
+        )
+        config = get_model_kwargs(args)["hst_config"]
+        self.assertEqual(config["variant"], "a3")
+        self.assertTrue(config["transition_enabled"])
+        self.assertEqual(config["hli_mode"], "mlp")
 
     def test_a2_parameter_count_is_unchanged(self):
         model = Net(

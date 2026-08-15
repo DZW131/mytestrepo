@@ -68,12 +68,19 @@ def get_model_kwargs(args):
     rectifier_type = getattr(args, 'rectifier', 'hfrm').lower()
     model_kwargs = {'rectifier_type': rectifier_type}
     if rectifier_type == 'hst':
+        variant = getattr(args, 'hst_variant', 'a1').lower()
+        transition_enabled = getattr(args, 'hst_transition_enabled', None)
+        if transition_enabled is None:
+            transition_enabled = variant in {'a2', 'a3'}
+        hli_mode = getattr(args, 'hst_hli_mode', None)
+        if hli_mode is None:
+            hli_mode = 'mlp' if variant == 'a3' else 'identity'
         model_kwargs['hst_config'] = {
-            'variant': getattr(args, 'hst_variant', 'a1'),
+            'variant': variant,
             'latent_dim': getattr(args, 'hst_latent_dim', 256),
             'context_kernel': getattr(args, 'hst_context_kernel', 15),
-            'transition_enabled': getattr(args, 'hst_transition_enabled', None),
-            'hli_mode': getattr(args, 'hst_hli_mode', None),
+            'transition_enabled': transition_enabled,
+            'hli_mode': hli_mode,
         }
     return model_kwargs
 

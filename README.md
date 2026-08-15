@@ -26,20 +26,21 @@ Experiments on the LUAD-HistoSeg and BCSS datasets demonstrate that SSHR outperf
 This repository keeps the public SSHR implementation as the reproducible A0
 baseline and develops new ideas through reviewable feature branches. The first
 innovation is **Hierarchical Semantic Transition (HST)**. The current milestone
-is A2: deep semantics are projected into a shared latent space and propagated
-as correction states, while each target hierarchy applies its own
-target-conditioned residual transition.
+is A3: four hierarchy descriptors interact through a lightweight latent token
+mixer before the correction state is progressively adapted by the A2
+stage-specific transitions.
 
 - `--rectifier hfrm`: unchanged public SSHR/HFRM baseline (default).
 - `--rectifier hst --hst_variant a1`: HST progressive-only A1.
 - `--rectifier hst --hst_variant a2`: HST stage-specific transition A2 with
   identity latent interaction and fixed learnable `rho=0.01` initialization.
-- A3 latent interaction remains intentionally unavailable until A2 is trained
-  and reviewed.
+- `--rectifier hst --hst_variant a3`: full HST with lightweight MLP hierarchy
+  interaction plus the unchanged A2 transitions.
 
 Implementation details and verified evidence are in the
 [A1 report](docs/innovation1_hst_implementation_report.md) and
-[A2 report](docs/innovation1_hst_a2_implementation_report.md).
+[A2 report](docs/innovation1_hst_a2_implementation_report.md), and
+[A3 report](docs/innovation1_hst_a3_implementation_report.md).
 
 ## Directory Structure
 
@@ -123,7 +124,7 @@ python train_sshr.py \
   --save_folder checkpoints_bcss
 ```
 
-### Innovation 1: BCSS A0/A1/A2 controlled runs
+### Innovation 1: BCSS A0/A1/A2/A3 controlled runs
 
 Keep every option identical and change only the rectifier switch.
 
@@ -175,13 +176,30 @@ python train_sshr.py \
   --save_folder experiments/innovation1/A2_bcss_seed42
 ```
 
+A3 full HST with hierarchy-token interaction:
+
+```bash
+python train_sshr.py \
+  --dataset bcss \
+  --rectifier hst \
+  --hst_variant a3 \
+  --hst_latent_dim 256 \
+  --hst_context_kernel 15 \
+  --seed 42 \
+  --trainroot datasets/BCSS-WSSS/training/ \
+  --valroot datasets/BCSS-WSSS/val/ \
+  --testroot datasets/BCSS-WSSS/test/ \
+  --weights init_weights/ilsvrc-cls_rna-a1_cls1000_ep-0001.params \
+  --save_folder experiments/innovation1/A3_bcss_seed42
+```
+
 All commands retain the frozen public-code loss, optimizer, schedule,
 inference, and metric. Training records `experiment_config.json` and
 `eval_history.json`, keeps `last.pth` plus the last five epoch checkpoints, and
 saves `best_val.pth` using validation mIoU only. Test metrics are reporting-only.
 
-The A2 command is documented for reproducibility but has not been launched in
-this milestone. Full A1/A2 training is intentionally deferred.
+The A1/A2/A3 commands are documented for reproducibility but have not been
+launched in these implementation milestones. Full training remains deferred.
 
 Run the development checks before training:
 
@@ -189,7 +207,8 @@ Run the development checks before training:
 python -m unittest discover -s tests -v
 python tools/smoke_hst_a1.py --device cuda --batch_size 2 --image_size 224
 python tools/smoke_hst_a2.py --device cuda --batch_size 2 --image_size 224 --steps 10
-python tools/profile_hst.py --device cuda --batch_size 1 --image_size 224 --hst_variant a2
+python tools/smoke_hst_a3.py --device cuda --batch_size 2 --image_size 224 --steps 10
+python tools/profile_hst.py --device cuda --batch_size 1 --image_size 224 --hst_variant a3
 ```
 
 ## Acknowledgement
