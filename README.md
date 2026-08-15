@@ -21,6 +21,23 @@ Experiments on the LUAD-HistoSeg and BCSS datasets demonstrate that SSHR outperf
   <img src="assets/main_flow.png" width="700" alt="WaveDiT architecture">
 </p>
 
+## Research Development
+
+This repository keeps the public SSHR implementation as the reproducible A0
+baseline and develops new ideas through reviewable feature branches. The first
+innovation is **Hierarchical Semantic Transition (HST)**. Its current milestone
+is A1 (progressive-only): deep semantics are projected into a shared latent
+space and propagated as correction states instead of broadcasting the raw
+deepest feature independently to every hierarchy.
+
+- `--rectifier hfrm`: unchanged public SSHR/HFRM baseline (default).
+- `--rectifier hst --hst_variant a1`: HST progressive-only A1.
+- A2 stage-specific transitions and A3 latent interaction are intentionally
+  disabled until A1 validation is reviewed.
+
+Implementation details and verified evidence are in
+[`docs/innovation1_hst_implementation_report.md`](docs/innovation1_hst_implementation_report.md).
+
 ## Directory Structure
 
 ```text
@@ -101,6 +118,54 @@ python train_sshr.py \
   --testroot datasets/BCSS-WSSS/test/ \
   --weights init_weights/ilsvrc-cls_rna-a1_cls1000_ep-0001.params \
   --save_folder checkpoints_bcss
+```
+
+### Innovation 1: BCSS A0/A1 controlled runs
+
+Keep every option identical and change only the rectifier switch.
+
+A0 frozen SSHR/HFRM baseline:
+
+```bash
+python train_sshr.py \
+  --dataset bcss \
+  --rectifier hfrm \
+  --seed 42 \
+  --trainroot datasets/BCSS-WSSS/training/ \
+  --valroot datasets/BCSS-WSSS/val/ \
+  --testroot datasets/BCSS-WSSS/test/ \
+  --weights init_weights/ilsvrc-cls_rna-a1_cls1000_ep-0001.params \
+  --save_folder experiments/innovation1/A0_bcss_seed42
+```
+
+A1 HST progressive-only:
+
+```bash
+python train_sshr.py \
+  --dataset bcss \
+  --rectifier hst \
+  --hst_variant a1 \
+  --hst_latent_dim 256 \
+  --hst_context_kernel 15 \
+  --seed 42 \
+  --trainroot datasets/BCSS-WSSS/training/ \
+  --valroot datasets/BCSS-WSSS/val/ \
+  --testroot datasets/BCSS-WSSS/test/ \
+  --weights init_weights/ilsvrc-cls_rna-a1_cls1000_ep-0001.params \
+  --save_folder experiments/innovation1/A1_bcss_seed42
+```
+
+Both commands retain the frozen public-code loss, optimizer, schedule,
+inference, and metric. Training records `experiment_config.json` and
+`eval_history.json`, keeps `last.pth` plus the last five epoch checkpoints, and
+saves `best_val.pth` using validation mIoU only. Test metrics are reporting-only.
+
+Run the development checks before training:
+
+```bash
+python -m unittest discover -s tests -v
+python tools/smoke_hst_a1.py --device cuda --batch_size 2 --image_size 224
+python tools/profile_hst.py --device cuda --batch_size 1 --image_size 224
 ```
 
 ## Acknowledgement
