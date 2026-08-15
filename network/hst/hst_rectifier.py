@@ -1,4 +1,4 @@
-"""A1/A2 Hierarchical Semantic Transition rectifier."""
+"""A1/A2/A3 Hierarchical Semantic Transition rectifier."""
 
 from dataclasses import dataclass
 from typing import Any, Dict, Mapping, Optional
@@ -20,28 +20,40 @@ class HSTConfig:
     latent_dim: int = 256
     context_kernel: int = 15
     transition_enabled: Optional[bool] = None
-    hli_mode: str = "identity"
+    hli_mode: Optional[str] = None
 
     def __post_init__(self) -> None:
         normalized_variant = self.variant.lower()
-        if normalized_variant not in {"a1", "a2"}:
+        if normalized_variant not in {"a1", "a2", "a3"}:
             raise ValueError(
-                "HST variant must be 'a1' or 'a2'; "
+                "HST variant must be 'a1', 'a2', or 'a3'; "
                 f"got {self.variant!r}."
             )
         object.__setattr__(self, "variant", normalized_variant)
 
         transition_enabled = self.transition_enabled
         if transition_enabled is None:
-            transition_enabled = normalized_variant == "a2"
+            transition_enabled = normalized_variant in {"a2", "a3"}
         if normalized_variant == "a1" and transition_enabled:
             raise ValueError("A1 cannot enable stage-specific transitions")
+        if normalized_variant == "a3" and not transition_enabled:
+            raise ValueError("A3 requires stage-specific transitions")
         object.__setattr__(self, "transition_enabled", transition_enabled)
 
-        if self.hli_mode != "identity":
+        hli_mode = self.hli_mode
+        if hli_mode is None:
+            hli_mode = "mlp" if normalized_variant == "a3" else "identity"
+        hli_mode = hli_mode.lower()
+        if hli_mode not in {"identity", "mlp"}:
             raise ValueError(
-                "A1/A2 require hli_mode='identity'; the MLP mixer belongs to A3"
+                "hli_mode must be 'identity' or 'mlp', "
+                f"got {self.hli_mode!r}"
             )
+        if normalized_variant in {"a1", "a2"} and hli_mode != "identity":
+            raise ValueError(
+                "A1/A2 require hli_mode='identity'; use A3 for MLP interaction"
+            )
+        object.__setattr__(self, "hli_mode", hli_mode)
         if self.latent_dim <= 0:
             raise ValueError(f"latent_dim must be positive, got {self.latent_dim}")
         if self.context_kernel <= 0 or self.context_kernel % 2 == 0:
@@ -67,11 +79,11 @@ class HSTConfig:
 class HSTRectifier(nn.Module):
     """Progress correction states from deep to stage3, stage2, and stage1.
 
-    A1 deliberately copies the parent correction state at each step.  It does
-    not instantiate a transition MLP or latent token mixer. A2 retains identity
-    latent interaction and applies a target-conditioned residual transition at
-    each stage. Stage-specific gate heads decode each correction state into its
-    own channel space.
+    A1 copies the parent correction state at each step. A2 adds target-
+    conditioned residual transitions while retaining identity latent
+    interaction. A3 keeps the A2 transitions and first mixes the four hierarchy
+    descriptors in latent space. Stage-specific gate heads decode each
+    correction state into its own channel space.
     """
 
     stage_channels = {
@@ -120,7 +132,7 @@ class HSTRectifier(nn.Module):
             {stage: nn.Parameter(torch.zeros(1)) for stage in self.top_down_stages}
         )
 
-        if self.config.variant == "a2":
+        if self.config.variant in {"a2", "a3"}:
             self.latent_interaction = HierarchicalLatentInteraction(
                 latent_dim=latent_dim,
                 mode=self.config.hli_mode,
@@ -169,8 +181,11 @@ class HSTRectifier(nn.Module):
             ],
             dim=1,
         )
-        if self.config.variant == "a2":
-            latent_tokens = self.latent_interaction(raw_latent_tokens)
+        if self.config.variant in {"a2", "a3"}:
+            latent_tokens, hli_residual = self.latent_interaction(
+                raw_latent_tokens,
+                return_residual=True,
+            )
             descriptors = {
                 "deep": latent_tokens[:, 0],
                 "stage3": latent_tokens[:, 1],
@@ -181,6 +196,7 @@ class HSTRectifier(nn.Module):
             # Preserve the A1 computational graph: target descriptors remain
             # diagnostics-only until A2 transitions consume them.
             latent_tokens = raw_latent_tokens
+            hli_residual = None
             descriptors = raw_descriptors
 
         correction_states = {
@@ -228,8 +244,10 @@ class HSTRectifier(nn.Module):
         return {
             "base_features": base_features,
             "raw_semantic_descriptors": raw_descriptors,
+            "raw_latent_tokens": raw_latent_tokens,
             "semantic_descriptors": descriptors,
             "latent_tokens": latent_tokens,
+            "hli_residual": hli_residual,
             "correction_states": correction_states,
             "transition_deltas": transition_deltas,
             "transition_scales": (

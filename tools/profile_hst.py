@@ -1,4 +1,4 @@
-"""Compare HFRM and HST-A1 parameters, Conv/Linear FLOPs, and latency."""
+"""Compare HFRM and an HST variant's parameters, FLOPs, and latency."""
 
 import argparse
 import json
@@ -118,7 +118,9 @@ def main():
     parser.add_argument("--image_size", default=224, type=int)
     parser.add_argument("--warmup", default=10, type=int)
     parser.add_argument("--iterations", default=30, type=int)
-    parser.add_argument("--hst_variant", default="a1", choices=["a1", "a2"])
+    parser.add_argument(
+        "--hst_variant", default="a1", choices=["a1", "a2", "a3"]
+    )
     args = parser.parse_args()
 
     device = torch.device(args.device)

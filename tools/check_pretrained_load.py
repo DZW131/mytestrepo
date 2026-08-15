@@ -26,7 +26,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("weights", type=Path)
     parser.add_argument("--rectifier", default="hst", choices=["hfrm", "hst"])
-    parser.add_argument("--hst_variant", default="a1", choices=["a1", "a2"])
+    parser.add_argument(
+        "--hst_variant", default="a1", choices=["a1", "a2", "a3"]
+    )
     args = parser.parse_args()
 
     weights_path = args.weights.expanduser().resolve()
