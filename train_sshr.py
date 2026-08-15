@@ -68,12 +68,19 @@ def get_model_kwargs(args):
     rectifier_type = getattr(args, 'rectifier', 'hfrm').lower()
     model_kwargs = {'rectifier_type': rectifier_type}
     if rectifier_type == 'hst':
+        variant = getattr(args, 'hst_variant', 'a1').lower()
+        transition_enabled = getattr(args, 'hst_transition_enabled', None)
+        if transition_enabled is None:
+            transition_enabled = variant in {'a2', 'a3'}
+        hli_mode = getattr(args, 'hst_hli_mode', None)
+        if hli_mode is None:
+            hli_mode = 'mlp' if variant == 'a3' else 'identity'
         model_kwargs['hst_config'] = {
-            'variant': getattr(args, 'hst_variant', 'a1'),
+            'variant': variant,
             'latent_dim': getattr(args, 'hst_latent_dim', 256),
             'context_kernel': getattr(args, 'hst_context_kernel', 15),
-            'transition_enabled': getattr(args, 'hst_transition_enabled', None),
-            'hli_mode': getattr(args, 'hst_hli_mode', 'identity'),
+            'transition_enabled': transition_enabled,
+            'hli_mode': hli_mode,
         }
     return model_kwargs
 
@@ -427,16 +434,25 @@ if __name__ == '__main__':
     parser.add_argument("--max_epoches", default=21, type=int)
     parser.add_argument("--network", default="network.resnet38_cls", type=str)
     parser.add_argument("--rectifier", default="hfrm", choices=["hfrm", "hst"])
-    parser.add_argument("--hst_variant", default="a1", choices=["a1", "a2"])
+    parser.add_argument(
+        "--hst_variant",
+        default="a1",
+        choices=["a1", "a2", "a3"],
+    )
     parser.add_argument("--hst_latent_dim", default=256, type=int)
     parser.add_argument("--hst_context_kernel", default=15, type=int)
     parser.add_argument(
         "--hst_transition_enabled",
         action=argparse.BooleanOptionalAction,
         default=None,
-        help="Override the variant default (A1=false, A2=true).",
+        help="Override the transition default (A1=false, A2/A3=true).",
     )
-    parser.add_argument("--hst_hli_mode", default="identity", choices=["identity"])
+    parser.add_argument(
+        "--hst_hli_mode",
+        default=None,
+        choices=["identity", "mlp"],
+        help="Override the HLI default (A1/A2=identity, A3=mlp).",
+    )
     parser.add_argument("--lr", default=0.01, type=float)
     parser.add_argument("--num_workers", default=8, type=int)
     parser.add_argument("--wt_dec", default=5e-4, type=float)

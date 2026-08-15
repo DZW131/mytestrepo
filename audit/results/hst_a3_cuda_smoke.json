@@ -1,0 +1,2006 @@
+{
+  "batch_size": 2,
+  "device": "cuda",
+  "hli_mode": "mlp",
+  "image_size": 224,
+  "optimization_readiness": {
+    "criterion": "HLI, transition MLP, and target projector gradients are finite and nonzero by step 2 or 3",
+    "pass": true,
+    "path_active_step": 2
+  },
+  "peak_cuda_memory_bytes": 1853116928,
+  "requested_steps": 10,
+  "steps": [
+    {
+      "finite_checks": {
+        "all": true,
+        "correction_states": true,
+        "gamma_gradients": true,
+        "hli_gradients": true,
+        "hli_residual": true,
+        "latent_tokens": true,
+        "loss": true,
+        "outputs": true,
+        "raw_latent_tokens": true,
+        "relative_transition_updates": true,
+        "rho_gradients": true,
+        "target_projector_gradients": true,
+        "transition_deltas": true,
+        "transition_mlp_gradients": true
+      },
+      "gamma_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0010565044358372688,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.001371642341837287,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0009523846674710512,
+          "present": true
+        }
+      },
+      "gamma_sem": {
+        "stage1": 0.0,
+        "stage2": 0.0,
+        "stage3": 0.0
+      },
+      "gamma_sem_after_update": {
+        "stage1": 0.00010565044794930145,
+        "stage2": -0.00013716424291487783,
+        "stage3": -9.52384652919136e-05
+      },
+      "hli_grad": {
+        "all": {
+          "finite": true,
+          "nonzero": false,
+          "norm": 0.0,
+          "present": true
+        },
+        "channel_mixer": {
+          "finite": true,
+          "nonzero": false,
+          "norm": 0.0,
+          "present": true
+        },
+        "normalization": {
+          "finite": true,
+          "nonzero": false,
+          "norm": 0.0,
+          "present": true
+        },
+        "token_mixer": {
+          "finite": true,
+          "nonzero": false,
+          "norm": 0.0,
+          "present": true
+        }
+      },
+      "hli_residual": {
+        "finite": true,
+        "per_token": {
+          "deep": {
+            "finite": true,
+            "ratio": 0.08008103181191628,
+            "raw_norm": 21.457368850708008,
+            "residual_norm": 1.7183282375335693
+          },
+          "stage1": {
+            "finite": true,
+            "ratio": 0.07972048920889793,
+            "raw_norm": 22.590051651000977,
+            "residual_norm": 1.8008899688720703
+          },
+          "stage2": {
+            "finite": true,
+            "ratio": 0.10433560046636518,
+            "raw_norm": 22.495634078979492,
+            "residual_norm": 2.347095489501953
+          },
+          "stage3": {
+            "finite": true,
+            "ratio": 0.08167499839364235,
+            "raw_norm": 22.352331161499023,
+            "residual_norm": 1.8256266117095947
+          }
+        },
+        "ratio": 0.08722705397847451,
+        "raw_norm": 44.456825256347656,
+        "residual_norm": 3.877837896347046
+      },
+      "loss": 0.6941928863525391,
+      "lr": 0.01,
+      "relative_transition_update": {
+        "stage1": {
+          "finite": true,
+          "parent_norm": 21.435546875,
+          "ratio": 0.002252834207104659,
+          "update_norm": 0.04829073324799538
+        },
+        "stage2": {
+          "finite": true,
+          "parent_norm": 21.43461036682129,
+          "ratio": 0.0020730335598909016,
+          "update_norm": 0.04443466663360596
+        },
+        "stage3": {
+          "finite": true,
+          "parent_norm": 21.432348251342773,
+          "ratio": 0.0019273885500247715,
+          "update_norm": 0.041308462619781494
+        }
+      },
+      "rho": {
+        "stage1": 0.009999999776482582,
+        "stage2": 0.009999999776482582,
+        "stage3": 0.009999999776482582
+      },
+      "rho_after_update": {
+        "stage1": 0.009999499656260014,
+        "stage2": 0.009999499656260014,
+        "stage3": 0.009999499656260014
+      },
+      "rho_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": false,
+          "norm": 0.0,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": false,
+          "norm": 0.0,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": false,
+          "norm": 0.0,
+          "present": true
+        }
+      },
+      "step": 1,
+      "target_projector_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": false,
+          "norm": 0.0,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": false,
+          "norm": 0.0,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": false,
+          "norm": 0.0,
+          "present": true
+        }
+      },
+      "transition_mlp_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": false,
+          "norm": 0.0,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": false,
+          "norm": 0.0,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": false,
+          "norm": 0.0,
+          "present": true
+        }
+      }
+    },
+    {
+      "finite_checks": {
+        "all": true,
+        "correction_states": true,
+        "gamma_gradients": true,
+        "hli_gradients": true,
+        "hli_residual": true,
+        "latent_tokens": true,
+        "loss": true,
+        "outputs": true,
+        "raw_latent_tokens": true,
+        "relative_transition_updates": true,
+        "rho_gradients": true,
+        "target_projector_gradients": true,
+        "transition_deltas": true,
+        "transition_mlp_gradients": true
+      },
+      "gamma_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0011393817840144038,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.001306182355619967,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0008786453399807215,
+          "present": true
+        }
+      },
+      "gamma_sem": {
+        "stage1": 0.00010565044794930145,
+        "stage2": -0.00013716424291487783,
+        "stage3": -9.52384652919136e-05
+      },
+      "gamma_sem_after_update": {
+        "stage1": 0.00020932417828589678,
+        "stage2": -0.00025602191453799605,
+        "stage3": -0.00017519309767521918
+      },
+      "hli_grad": {
+        "all": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.1230194416643037e-07,
+          "present": true
+        },
+        "channel_mixer": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.1138802406657048e-07,
+          "present": true
+        },
+        "normalization": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.074932130461398e-09,
+          "present": true
+        },
+        "token_mixer": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.4257604252470418e-08,
+          "present": true
+        }
+      },
+      "hli_residual": {
+        "finite": true,
+        "per_token": {
+          "deep": {
+            "finite": true,
+            "ratio": 0.08002078933532782,
+            "raw_norm": 21.462257385253906,
+            "residual_norm": 1.7174267768859863
+          },
+          "stage1": {
+            "finite": true,
+            "ratio": 0.07969847000259729,
+            "raw_norm": 22.588905334472656,
+            "residual_norm": 1.800301194190979
+          },
+          "stage2": {
+            "finite": true,
+            "ratio": 0.10428777104019436,
+            "raw_norm": 22.494403839111328,
+            "residual_norm": 2.345891237258911
+          },
+          "stage3": {
+            "finite": true,
+            "ratio": 0.08168072361229788,
+            "raw_norm": 22.35097312927246,
+            "residual_norm": 1.8256436586380005
+          }
+        },
+        "ratio": 0.08719477993110475,
+        "raw_norm": 44.457298278808594,
+        "residual_norm": 3.8764443397521973
+      },
+      "loss": 0.6918057203292847,
+      "lr": 0.01,
+      "relative_transition_update": {
+        "stage1": {
+          "finite": true,
+          "parent_norm": 21.434715270996094,
+          "ratio": 0.002248498649310498,
+          "update_norm": 0.04819592833518982
+        },
+        "stage2": {
+          "finite": true,
+          "parent_norm": 21.433780670166016,
+          "ratio": 0.00208468502352041,
+          "update_norm": 0.04468268156051636
+        },
+        "stage3": {
+          "finite": true,
+          "parent_norm": 21.431453704833984,
+          "ratio": 0.0019445250823250347,
+          "update_norm": 0.04167399927973747
+        }
+      },
+      "rho": {
+        "stage1": 0.009999499656260014,
+        "stage2": 0.009999499656260014,
+        "stage3": 0.009999499656260014
+      },
+      "rho_after_update": {
+        "stage1": 0.009999044239521027,
+        "stage2": 0.009999045170843601,
+        "stage3": 0.009999044239521027
+      },
+      "rho_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 9.47077882784697e-09,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 6.697834287194837e-09,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.8772610133055423e-09,
+          "present": true
+        }
+      },
+      "step": 2,
+      "target_projector_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 5.217655633716035e-09,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.0098078119967418e-08,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 3.117795119502429e-08,
+          "present": true
+        }
+      },
+      "transition_mlp_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 4.2700153439557676e-09,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 5.632624491734742e-09,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 5.583296688256689e-09,
+          "present": true
+        }
+      }
+    },
+    {
+      "finite_checks": {
+        "all": true,
+        "correction_states": true,
+        "gamma_gradients": true,
+        "hli_gradients": true,
+        "hli_residual": true,
+        "latent_tokens": true,
+        "loss": true,
+        "outputs": true,
+        "raw_latent_tokens": true,
+        "relative_transition_updates": true,
+        "rho_gradients": true,
+        "target_projector_gradients": true,
+        "transition_deltas": true,
+        "transition_mlp_gradients": true
+      },
+      "gamma_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0012221222277730703,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0012288305442780256,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0007893081055954099,
+          "present": true
+        }
+      },
+      "gamma_sem": {
+        "stage1": 0.00020932417828589678,
+        "stage2": -0.00025602191453799605,
+        "stage3": -0.00017519309767521918
+      },
+      "gamma_sem_after_update": {
+        "stage1": 0.00030933821108192205,
+        "stage2": -0.0003565896477084607,
+        "stage3": -0.00023979140678420663
+      },
+      "hli_grad": {
+        "all": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.1579026111484978e-07,
+          "present": true
+        },
+        "channel_mixer": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.139543212978001e-07,
+          "present": true
+        },
+        "normalization": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.0618141582852445e-09,
+          "present": true
+        },
+        "token_mixer": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.80131060825013e-08,
+          "present": true
+        }
+      },
+      "hli_residual": {
+        "finite": true,
+        "per_token": {
+          "deep": {
+            "finite": true,
+            "ratio": 0.08004379161956039,
+            "raw_norm": 21.45818519592285,
+            "residual_norm": 1.7175945043563843
+          },
+          "stage1": {
+            "finite": true,
+            "ratio": 0.07965907891459187,
+            "raw_norm": 22.587871551513672,
+            "residual_norm": 1.7993290424346924
+          },
+          "stage2": {
+            "finite": true,
+            "ratio": 0.10423476871463358,
+            "raw_norm": 22.49329376220703,
+            "residual_norm": 2.34458327293396
+          },
+          "stage3": {
+            "finite": true,
+            "ratio": 0.08150825898794808,
+            "raw_norm": 22.349775314331055,
+            "residual_norm": 1.8216912746429443
+          }
+        },
+        "ratio": 0.08713380728098653,
+        "raw_norm": 44.453643798828125,
+        "residual_norm": 3.873415231704712
+      },
+      "loss": 0.6901741623878479,
+      "lr": 0.009095325760829623,
+      "relative_transition_update": {
+        "stage1": {
+          "finite": true,
+          "parent_norm": 21.42857551574707,
+          "ratio": 0.002255349399619217,
+          "update_norm": 0.04832892492413521
+        },
+        "stage2": {
+          "finite": true,
+          "parent_norm": 21.427642822265625,
+          "ratio": 0.002076796511658182,
+          "update_norm": 0.04450085386633873
+        },
+        "stage3": {
+          "finite": true,
+          "parent_norm": 21.425342559814453,
+          "ratio": 0.0019377652259960562,
+          "update_norm": 0.04151728376746178
+        }
+      },
+      "rho": {
+        "stage1": 0.009999044239521027,
+        "stage2": 0.009999045170843601,
+        "stage3": 0.009999044239521027
+      },
+      "rho_after_update": {
+        "stage1": 0.009998633526265621,
+        "stage2": 0.00999863725155592,
+        "stage3": 0.009998634457588196
+      },
+      "rho_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.851188891066613e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.4034592155098835e-08,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 3.923045888143406e-09,
+          "present": true
+        }
+      },
+      "step": 3,
+      "target_projector_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.0048696149709239e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 3.873274446499432e-08,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 5.982950875598491e-08,
+          "present": true
+        }
+      },
+      "transition_mlp_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 8.44823531969136e-09,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.0827926092791183e-08,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.0702087537411462e-08,
+          "present": true
+        }
+      }
+    },
+    {
+      "finite_checks": {
+        "all": true,
+        "correction_states": true,
+        "gamma_gradients": true,
+        "hli_gradients": true,
+        "hli_residual": true,
+        "latent_tokens": true,
+        "loss": true,
+        "outputs": true,
+        "raw_latent_tokens": true,
+        "relative_transition_updates": true,
+        "rho_gradients": true,
+        "target_projector_gradients": true,
+        "transition_deltas": true,
+        "transition_mlp_gradients": true
+      },
+      "gamma_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.001285741338506341,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0011711419792845845,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0007306464831344783,
+          "present": true
+        }
+      },
+      "gamma_sem": {
+        "stage1": 0.00030933821108192205,
+        "stage2": -0.0003565896477084607,
+        "stage3": -0.00023979140678420663
+      },
+      "gamma_sem_after_update": {
+        "stage1": 0.00040264130802825093,
+        "stage2": -0.00044157804222777486,
+        "stage3": -0.0002928137546405196
+      },
+      "hli_grad": {
+        "all": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 3.1006611224305626e-07,
+          "present": true
+        },
+        "channel_mixer": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 3.0736694822136774e-07,
+          "present": true
+        },
+        "normalization": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.961685046029905e-09,
+          "present": true
+        },
+        "token_mixer": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 4.071586330037389e-08,
+          "present": true
+        }
+      },
+      "hli_residual": {
+        "finite": true,
+        "per_token": {
+          "deep": {
+            "finite": true,
+            "ratio": 0.07996489514981696,
+            "raw_norm": 21.461227416992188,
+            "residual_norm": 1.7161448001861572
+          },
+          "stage1": {
+            "finite": true,
+            "ratio": 0.07966113713979879,
+            "raw_norm": 22.58694076538086,
+            "residual_norm": 1.7993013858795166
+          },
+          "stage2": {
+            "finite": true,
+            "ratio": 0.10430367165307577,
+            "raw_norm": 22.492321014404297,
+            "residual_norm": 2.346031665802002
+          },
+          "stage3": {
+            "finite": true,
+            "ratio": 0.08151846332728893,
+            "raw_norm": 22.34873390197754,
+            "residual_norm": 1.8218344449996948
+          }
+        },
+        "ratio": 0.087140344999005,
+        "raw_norm": 44.4536247253418,
+        "residual_norm": 3.873704195022583
+      },
+      "loss": 0.689499020576477,
+      "lr": 0.008180521460508584,
+      "relative_transition_update": {
+        "stage1": {
+          "finite": true,
+          "parent_norm": 21.431354522705078,
+          "ratio": 0.0022585643749440426,
+          "update_norm": 0.04840409383177757
+        },
+        "stage2": {
+          "finite": true,
+          "parent_norm": 21.43044090270996,
+          "ratio": 0.0020740216550817424,
+          "update_norm": 0.04444719851016998
+        },
+        "stage3": {
+          "finite": true,
+          "parent_norm": 21.428050994873047,
+          "ratio": 0.0019463484578600503,
+          "update_norm": 0.04170645400881767
+        }
+      },
+      "rho": {
+        "stage1": 0.009998633526265621,
+        "stage2": 0.00999863725155592,
+        "stage3": 0.009998634457588196
+      },
+      "rho_after_update": {
+        "stage1": 0.009998268447816372,
+        "stage2": 0.009998275898396969,
+        "stage3": 0.009998271241784096
+      },
+      "rho_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.702457457814944e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.0694354674333226e-08,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 4.260629182795128e-09,
+          "present": true
+        }
+      },
+      "step": 4,
+      "target_projector_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.4480773198996653e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 5.5751875864020165e-08,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 8.591394870503632e-08,
+          "present": true
+        }
+      },
+      "transition_mlp_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.2433746892183699e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.5634663902186243e-08,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.54263033406295e-08,
+          "present": true
+        }
+      }
+    },
+    {
+      "finite_checks": {
+        "all": true,
+        "correction_states": true,
+        "gamma_gradients": true,
+        "hli_gradients": true,
+        "hli_residual": true,
+        "latent_tokens": true,
+        "loss": true,
+        "outputs": true,
+        "raw_latent_tokens": true,
+        "relative_transition_updates": true,
+        "rho_gradients": true,
+        "target_projector_gradients": true,
+        "transition_deltas": true,
+        "transition_mlp_gradients": true
+      },
+      "gamma_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0013528524432331324,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0011194732505828142,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0006851318757981062,
+          "present": true
+        }
+      },
+      "gamma_sem": {
+        "stage1": 0.00040264130802825093,
+        "stage2": -0.00044157804222777486,
+        "stage3": -0.0002928137546405196
+      },
+      "gamma_sem_after_update": {
+        "stage1": 0.0004880945198237896,
+        "stage2": -0.0005122897564433515,
+        "stage3": -0.0003360899572726339
+      },
+      "hli_grad": {
+        "all": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 3.942434207372166e-07,
+          "present": true
+        },
+        "channel_mixer": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 3.90727189390467e-07,
+          "present": true
+        },
+        "normalization": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 3.771613777815553e-09,
+          "present": true
+        },
+        "token_mixer": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 5.240146176509883e-08,
+          "present": true
+        }
+      },
+      "hli_residual": {
+        "finite": true,
+        "per_token": {
+          "deep": {
+            "finite": true,
+            "ratio": 0.07998854074867108,
+            "raw_norm": 21.459074020385742,
+            "residual_norm": 1.716480016708374
+          },
+          "stage1": {
+            "finite": true,
+            "ratio": 0.07965156084930876,
+            "raw_norm": 22.586116790771484,
+            "residual_norm": 1.799019455909729
+          },
+          "stage2": {
+            "finite": true,
+            "ratio": 0.10418089771193201,
+            "raw_norm": 22.491456985473633,
+            "residual_norm": 2.3431801795959473
+          },
+          "stage3": {
+            "finite": true,
+            "ratio": 0.08149853529527437,
+            "raw_norm": 22.347824096679688,
+            "residual_norm": 1.8213149309158325
+          }
+        },
+        "ratio": 0.08710102582815181,
+        "raw_norm": 44.451271057128906,
+        "residual_norm": 3.871751308441162
+      },
+      "loss": 0.6886038780212402,
+      "lr": 0.007254178469372199,
+      "relative_transition_update": {
+        "stage1": {
+          "finite": true,
+          "parent_norm": 21.431825637817383,
+          "ratio": 0.002248982759422038,
+          "update_norm": 0.04819980636239052
+        },
+        "stage2": {
+          "finite": true,
+          "parent_norm": 21.430831909179688,
+          "ratio": 0.002070957633350356,
+          "update_norm": 0.04438234493136406
+        },
+        "stage3": {
+          "finite": true,
+          "parent_norm": 21.428564071655273,
+          "ratio": 0.0019402012184595477,
+          "update_norm": 0.04157572612166405
+        }
+      },
+      "rho": {
+        "stage1": 0.009998268447816372,
+        "stage2": 0.009998275898396969,
+        "stage3": 0.009998271241784096
+      },
+      "rho_after_update": {
+        "stage1": 0.009997950866818428,
+        "stage2": 0.009997962042689323,
+        "stage3": 0.009997955523431301
+      },
+      "rho_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 3.4810796023521107e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.619813876947319e-08,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 4.66876493021573e-09,
+          "present": true
+        }
+      },
+      "step": 5,
+      "target_projector_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.844555250583699e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 7.093432729482187e-08,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.091584979402676e-07,
+          "present": true
+        }
+      },
+      "transition_mlp_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.6108768450177128e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.986380423013002e-08,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.961207660502244e-08,
+          "present": true
+        }
+      }
+    },
+    {
+      "finite_checks": {
+        "all": true,
+        "correction_states": true,
+        "gamma_gradients": true,
+        "hli_gradients": true,
+        "hli_residual": true,
+        "latent_tokens": true,
+        "loss": true,
+        "outputs": true,
+        "raw_latent_tokens": true,
+        "relative_transition_updates": true,
+        "rho_gradients": true,
+        "target_projector_gradients": true,
+        "transition_deltas": true,
+        "transition_mlp_gradients": true
+      },
+      "gamma_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0013939285418018699,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0010879847686737776,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0006298532243818045,
+          "present": true
+        }
+      },
+      "gamma_sem": {
+        "stage1": 0.0004880945198237896,
+        "stage2": -0.0005122897564433515,
+        "stage3": -0.0003360899572726339
+      },
+      "gamma_sem_after_update": {
+        "stage1": 0.0005628165090456605,
+        "stage2": -0.000570609699934721,
+        "stage3": -0.00036985232145525515
+      },
+      "hli_grad": {
+        "all": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 4.695905465173416e-07,
+          "present": true
+        },
+        "channel_mixer": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 4.6530954767722357e-07,
+          "present": true
+        },
+        "normalization": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 4.485263281937867e-09,
+          "present": true
+        },
+        "token_mixer": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 6.310458487435672e-08,
+          "present": true
+        }
+      },
+      "hli_residual": {
+        "finite": true,
+        "per_token": {
+          "deep": {
+            "finite": true,
+            "ratio": 0.08004622837158648,
+            "raw_norm": 21.4593563079834,
+            "residual_norm": 1.717740535736084
+          },
+          "stage1": {
+            "finite": true,
+            "ratio": 0.07973694129017078,
+            "raw_norm": 22.585399627685547,
+            "residual_norm": 1.8008906841278076
+          },
+          "stage2": {
+            "finite": true,
+            "ratio": 0.10426193745060576,
+            "raw_norm": 22.49070930480957,
+            "residual_norm": 2.3449249267578125
+          },
+          "stage3": {
+            "finite": true,
+            "ratio": 0.08142616982666949,
+            "raw_norm": 22.347043991088867,
+            "residual_norm": 1.819634199142456
+          }
+        },
+        "ratio": 0.08714109882520057,
+        "raw_norm": 44.45027160644531,
+        "residual_norm": 3.873445510864258
+      },
+      "loss": 0.6878706812858582,
+      "lr": 0.006314458674893553,
+      "relative_transition_update": {
+        "stage1": {
+          "finite": true,
+          "parent_norm": 21.428964614868164,
+          "ratio": 0.002254185765273612,
+          "update_norm": 0.04830486699938774
+        },
+        "stage2": {
+          "finite": true,
+          "parent_norm": 21.42809295654297,
+          "ratio": 0.002072612107483365,
+          "update_norm": 0.044412124902009964
+        },
+        "stage3": {
+          "finite": true,
+          "parent_norm": 21.42597198486328,
+          "ratio": 0.0019451908828309022,
+          "update_norm": 0.041677605360746384
+        }
+      },
+      "rho": {
+        "stage1": 0.009997950866818428,
+        "stage2": 0.009997962042689323,
+        "stage3": 0.009997955523431301
+      },
+      "rho_after_update": {
+        "stage1": 0.00999768078327179,
+        "stage2": 0.009997695684432983,
+        "stage3": 0.009997687302529812
+      },
+      "rho_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 4.383392138151976e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 3.2996410936902976e-08,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 5.105828648765964e-09,
+          "present": true
+        }
+      },
+      "step": 6,
+      "target_projector_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.1972423983732093e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 8.455421537562378e-08,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.297572745034667e-07,
+          "present": true
+        }
+      },
+      "transition_mlp_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.9543014214332697e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.3739323158619385e-08,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.3405356923846346e-08,
+          "present": true
+        }
+      }
+    },
+    {
+      "finite_checks": {
+        "all": true,
+        "correction_states": true,
+        "gamma_gradients": true,
+        "hli_gradients": true,
+        "hli_residual": true,
+        "latent_tokens": true,
+        "loss": true,
+        "outputs": true,
+        "raw_latent_tokens": true,
+        "relative_transition_updates": true,
+        "rho_gradients": true,
+        "target_projector_gradients": true,
+        "transition_deltas": true,
+        "transition_mlp_gradients": true
+      },
+      "gamma_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0014433612814173102,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0010397700825706124,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0005935962544754148,
+          "present": true
+        }
+      },
+      "gamma_sem": {
+        "stage1": 0.0005628165090456605,
+        "stage2": -0.000570609699934721,
+        "stage3": -0.00036985232145525515
+      },
+      "gamma_sem_after_update": {
+        "stage1": 0.0006261093076318502,
+        "stage2": -0.0006162028294056654,
+        "stage3": -0.0003958802844863385
+      },
+      "hli_grad": {
+        "all": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 5.339479634853674e-07,
+          "present": true
+        },
+        "channel_mixer": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 5.291160880323661e-07,
+          "present": true
+        },
+        "normalization": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 5.103596921171811e-09,
+          "present": true
+        },
+        "token_mixer": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 7.14880856784034e-08,
+          "present": true
+        }
+      },
+      "hli_residual": {
+        "finite": true,
+        "per_token": {
+          "deep": {
+            "finite": true,
+            "ratio": 0.07999935989060773,
+            "raw_norm": 21.461454391479492,
+            "residual_norm": 1.7169026136398315
+          },
+          "stage1": {
+            "finite": true,
+            "ratio": 0.07962137808374085,
+            "raw_norm": 22.58479118347168,
+            "residual_norm": 1.7982321977615356
+          },
+          "stage2": {
+            "finite": true,
+            "ratio": 0.10433325341551158,
+            "raw_norm": 22.490079879760742,
+            "residual_norm": 2.346463203430176
+          },
+          "stage3": {
+            "finite": true,
+            "ratio": 0.08159424491367823,
+            "raw_norm": 22.34636688232422,
+            "residual_norm": 1.8233349323272705
+          }
+        },
+        "ratio": 0.08716497413748123,
+        "raw_norm": 44.4503173828125,
+        "residual_norm": 3.8745107650756836
+      },
+      "loss": 0.6865339279174805,
+      "lr": 0.005358867312681466,
+      "relative_transition_update": {
+        "stage1": {
+          "finite": true,
+          "parent_norm": 21.432525634765625,
+          "ratio": 0.0022630256760455985,
+          "update_norm": 0.0485023558139801
+        },
+        "stage2": {
+          "finite": true,
+          "parent_norm": 21.431432723999023,
+          "ratio": 0.0020744558340140915,
+          "update_norm": 0.04445856064558029
+        },
+        "stage3": {
+          "finite": true,
+          "parent_norm": 21.429195404052734,
+          "ratio": 0.0019422906563443753,
+          "update_norm": 0.041621726006269455
+        }
+      },
+      "rho": {
+        "stage1": 0.00999768078327179,
+        "stage2": 0.009997695684432983,
+        "stage3": 0.009997687302529812
+      },
+      "rho_after_update": {
+        "stage1": 0.009997459128499031,
+        "stage2": 0.009997477754950523,
+        "stage3": 0.009997467510402203
+      },
+      "rho_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 4.931176178502028e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 3.842421136823759e-08,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 5.540506720080884e-09,
+          "present": true
+        }
+      },
+      "step": 7,
+      "target_projector_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.5038921222005153e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 9.637911936679518e-08,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.4787852777630996e-07,
+          "present": true
+        }
+      },
+      "transition_mlp_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.251622826924399e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.7043390836615347e-08,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.658734577779594e-08,
+          "present": true
+        }
+      }
+    },
+    {
+      "finite_checks": {
+        "all": true,
+        "correction_states": true,
+        "gamma_gradients": true,
+        "hli_gradients": true,
+        "hli_residual": true,
+        "latent_tokens": true,
+        "loss": true,
+        "outputs": true,
+        "raw_latent_tokens": true,
+        "relative_transition_updates": true,
+        "rho_gradients": true,
+        "target_projector_gradients": true,
+        "transition_deltas": true,
+        "transition_mlp_gradients": true
+      },
+      "gamma_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0014855810441076756,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0010017657186836004,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0005576616968028247,
+          "present": true
+        }
+      },
+      "gamma_sem": {
+        "stage1": 0.0006261093076318502,
+        "stage2": -0.0006162028294056654,
+        "stage3": -0.0003958802844863385
+      },
+      "gamma_sem_after_update": {
+        "stage1": 0.0006763927522115409,
+        "stage2": -0.0006501080933958292,
+        "stage3": -0.000414753973018378
+      },
+      "hli_grad": {
+        "all": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 5.865676163317849e-07,
+          "present": true
+        },
+        "channel_mixer": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 5.811204490990635e-07,
+          "present": true
+        },
+        "normalization": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 5.622096066219673e-09,
+          "present": true
+        },
+        "token_mixer": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 7.955491313474588e-08,
+          "present": true
+        }
+      },
+      "hli_residual": {
+        "finite": true,
+        "per_token": {
+          "deep": {
+            "finite": true,
+            "ratio": 0.08001337846550613,
+            "raw_norm": 21.44765853881836,
+            "residual_norm": 1.7160996198654175
+          },
+          "stage1": {
+            "finite": true,
+            "ratio": 0.07968674716601883,
+            "raw_norm": 22.58429527282715,
+            "residual_norm": 1.7996690273284912
+          },
+          "stage2": {
+            "finite": true,
+            "ratio": 0.10418692044303919,
+            "raw_norm": 22.48956871032715,
+            "residual_norm": 2.343118906021118
+          },
+          "stage3": {
+            "finite": true,
+            "ratio": 0.08149170984823033,
+            "raw_norm": 22.3458251953125,
+            "residual_norm": 1.8209995031356812
+          }
+        },
+        "ratio": 0.08711630074178359,
+        "raw_norm": 44.442874908447266,
+        "residual_norm": 3.8716988563537598
+      },
+      "loss": 0.6865078806877136,
+      "lr": 0.0043838329055408696,
+      "relative_transition_update": {
+        "stage1": {
+          "finite": true,
+          "parent_norm": 21.412960052490234,
+          "ratio": 0.0022571254698011624,
+          "update_norm": 0.04833173751831055
+        },
+        "stage2": {
+          "finite": true,
+          "parent_norm": 21.411998748779297,
+          "ratio": 0.002076553346349483,
+          "update_norm": 0.044463157653808594
+        },
+        "stage3": {
+          "finite": true,
+          "parent_norm": 21.409740447998047,
+          "ratio": 0.0019437537194194677,
+          "update_norm": 0.041615262627601624
+        }
+      },
+      "rho": {
+        "stage1": 0.009997459128499031,
+        "stage2": 0.009997477754950523,
+        "stage3": 0.009997467510402203
+      },
+      "rho_after_update": {
+        "stage1": 0.009997287765145302,
+        "stage2": 0.009997310116887093,
+        "stage3": 0.009997298009693623
+      },
+      "rho_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 5.5705154267116086e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 4.323430147223917e-08,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 4.446071955044317e-09,
+          "present": true
+        }
+      },
+      "step": 8,
+      "target_projector_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.7605760758973187e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.0601431619253598e-07,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.6243469472693203e-07,
+          "present": true
+        }
+      },
+      "transition_mlp_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.492534789381517e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.9727741023977465e-08,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.9275162792769692e-08,
+          "present": true
+        }
+      }
+    },
+    {
+      "finite_checks": {
+        "all": true,
+        "correction_states": true,
+        "gamma_gradients": true,
+        "hli_gradients": true,
+        "hli_residual": true,
+        "latent_tokens": true,
+        "loss": true,
+        "outputs": true,
+        "raw_latent_tokens": true,
+        "relative_transition_updates": true,
+        "rho_gradients": true,
+        "target_projector_gradients": true,
+        "transition_deltas": true,
+        "transition_mlp_gradients": true
+      },
+      "gamma_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0014974265359342098,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0009811469353735447,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0005340618081390858,
+          "present": true
+        }
+      },
+      "gamma_sem": {
+        "stage1": 0.0006763927522115409,
+        "stage2": -0.0006501080933958292,
+        "stage3": -0.000414753973018378
+      },
+      "gamma_sem_after_update": {
+        "stage1": 0.0007115803891792893,
+        "stage2": -0.0006731617031618953,
+        "stage3": -0.00042730203131213784
+      },
+      "hli_grad": {
+        "all": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 6.290392914811692e-07,
+          "present": true
+        },
+        "channel_mixer": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 6.231872037771117e-07,
+          "present": true
+        },
+        "normalization": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 6.019981912393474e-09,
+          "present": true
+        },
+        "token_mixer": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 8.539261732357437e-08,
+          "present": true
+        }
+      },
+      "hli_residual": {
+        "finite": true,
+        "per_token": {
+          "deep": {
+            "finite": true,
+            "ratio": 0.08003124376997774,
+            "raw_norm": 21.459508895874023,
+            "residual_norm": 1.7174311876296997
+          },
+          "stage1": {
+            "finite": true,
+            "ratio": 0.07967850358017761,
+            "raw_norm": 22.583911895751953,
+            "residual_norm": 1.799452304840088
+          },
+          "stage2": {
+            "finite": true,
+            "ratio": 0.10422310011911824,
+            "raw_norm": 22.48917579650879,
+            "residual_norm": 2.3438916206359863
+          },
+          "stage3": {
+            "finite": true,
+            "ratio": 0.08149639513871877,
+            "raw_norm": 22.345409393310547,
+            "residual_norm": 1.8210703134536743
+          }
+        },
+        "ratio": 0.08712856192542011,
+        "raw_norm": 44.44799041748047,
+        "residual_norm": 3.8726894855499268
+      },
+      "loss": 0.6855852603912354,
+      "lr": 0.0033838346190164987,
+      "relative_transition_update": {
+        "stage1": {
+          "finite": true,
+          "parent_norm": 21.424989700317383,
+          "ratio": 0.0022575463063630695,
+          "update_norm": 0.048367906361818314
+        },
+        "stage2": {
+          "finite": true,
+          "parent_norm": 21.423978805541992,
+          "ratio": 0.002076437377835953,
+          "update_norm": 0.04448555037379265
+        },
+        "stage3": {
+          "finite": true,
+          "parent_norm": 21.42182731628418,
+          "ratio": 0.0019413252539330812,
+          "update_norm": 0.041586734354496
+        }
+      },
+      "rho": {
+        "stage1": 0.009997287765145302,
+        "stage2": 0.009997310116887093,
+        "stage3": 0.009997298009693623
+      },
+      "rho_after_update": {
+        "stage1": 0.009997168555855751,
+        "stage2": 0.009997193701565266,
+        "stage3": 0.009997180663049221
+      },
+      "rho_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 5.9603344482184184e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 4.3882565137209895e-08,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 5.387455814798159e-09,
+          "present": true
+        }
+      },
+      "step": 9,
+      "target_projector_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.969709670865198e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.136672978679599e-07,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.7393212033490085e-07,
+          "present": true
+        }
+      },
+      "transition_mlp_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.6952243817576477e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 3.187252636546855e-08,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 3.1382862289047154e-08,
+          "present": true
+        }
+      }
+    },
+    {
+      "finite_checks": {
+        "all": true,
+        "correction_states": true,
+        "gamma_gradients": true,
+        "hli_gradients": true,
+        "hli_residual": true,
+        "latent_tokens": true,
+        "loss": true,
+        "outputs": true,
+        "raw_latent_tokens": true,
+        "relative_transition_updates": true,
+        "rho_gradients": true,
+        "target_projector_gradients": true,
+        "transition_deltas": true,
+        "transition_mlp_gradients": true
+      },
+      "gamma_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0015323114348575473,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0009685605764389038,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 0.0005121342837810516,
+          "present": true
+        }
+      },
+      "gamma_sem": {
+        "stage1": 0.0007115803891792893,
+        "stage2": -0.0006731617031618953,
+        "stage3": -0.00042730203131213784
+      },
+      "gamma_sem_after_update": {
+        "stage1": 0.0007308759959414601,
+        "stage2": -0.0006853570812381804,
+        "stage3": -0.000433750101365149
+      },
+      "hli_grad": {
+        "all": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 6.579275245405543e-07,
+          "present": true
+        },
+        "channel_mixer": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 6.517935622563198e-07,
+          "present": true
+        },
+        "normalization": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 6.310800169403371e-09,
+          "present": true
+        },
+        "token_mixer": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 8.940891203062715e-08,
+          "present": true
+        }
+      },
+      "hli_residual": {
+        "finite": true,
+        "per_token": {
+          "deep": {
+            "finite": true,
+            "ratio": 0.08001093956282106,
+            "raw_norm": 21.45722198486328,
+            "residual_norm": 1.7168124914169312
+          },
+          "stage1": {
+            "finite": true,
+            "ratio": 0.07964809339025514,
+            "raw_norm": 22.583648681640625,
+            "residual_norm": 1.798744559288025
+          },
+          "stage2": {
+            "finite": true,
+            "ratio": 0.1042301208363025,
+            "raw_norm": 22.488903045654297,
+            "residual_norm": 2.3440210819244385
+          },
+          "stage3": {
+            "finite": true,
+            "ratio": 0.08151820579463694,
+            "raw_norm": 22.345125198364258,
+            "residual_norm": 1.821534514427185
+          }
+        },
+        "ratio": 0.08712463982794821,
+        "raw_norm": 44.44647216796875,
+        "residual_norm": 3.872382879257202
+      },
+      "loss": 0.6849691271781921,
+      "lr": 0.0023492378861760376,
+      "relative_transition_update": {
+        "stage1": {
+          "finite": true,
+          "parent_norm": 21.429758071899414,
+          "ratio": 0.0022660037218417027,
+          "update_norm": 0.04855991154909134
+        },
+        "stage2": {
+          "finite": true,
+          "parent_norm": 21.428707122802734,
+          "ratio": 0.0020683449412802917,
+          "update_norm": 0.04432195797562599
+        },
+        "stage3": {
+          "finite": true,
+          "parent_norm": 21.426374435424805,
+          "ratio": 0.001942695551727404,
+          "update_norm": 0.041624922305345535
+        }
+      },
+      "rho": {
+        "stage1": 0.009997168555855751,
+        "stage2": 0.009997193701565266,
+        "stage3": 0.009997180663049221
+      },
+      "rho_after_update": {
+        "stage1": 0.009997105225920677,
+        "stage2": 0.009997131302952766,
+        "stage3": 0.009997117333114147
+      },
+      "rho_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 6.428324184071244e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 4.707196410436154e-08,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 5.140936565339871e-09,
+          "present": true
+        }
+      },
+      "step": 10,
+      "target_projector_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 3.106336844672041e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.189199841788045e-07,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 1.8221231887335958e-07,
+          "present": true
+        }
+      },
+      "transition_mlp_grad": {
+        "stage1": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 2.835308296129098e-08,
+          "present": true
+        },
+        "stage2": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 3.338133629084697e-08,
+          "present": true
+        },
+        "stage3": {
+          "finite": true,
+          "nonzero": true,
+          "norm": 3.284558970883362e-08,
+          "present": true
+        }
+      }
+    }
+  ],
+  "variant": "a3"
+}
