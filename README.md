@@ -33,7 +33,7 @@ target-conditioned residual transition.
 - `--rectifier hfrm`: unchanged public SSHR/HFRM baseline (default).
 - `--rectifier hst --hst_variant a1`: HST progressive-only A1.
 - `--rectifier hst --hst_variant a2`: HST stage-specific transition A2 with
-  identity latent interaction.
+  identity latent interaction and fixed learnable `rho=0.01` initialization.
 - A3 latent interaction remains intentionally unavailable until A2 is trained
   and reviewed.
 
@@ -188,7 +188,7 @@ Run the development checks before training:
 ```bash
 python -m unittest discover -s tests -v
 python tools/smoke_hst_a1.py --device cuda --batch_size 2 --image_size 224
-python tools/smoke_hst_a2.py --device cuda --batch_size 2 --image_size 224
+python tools/smoke_hst_a2.py --device cuda --batch_size 2 --image_size 224 --steps 10
 python tools/profile_hst.py --device cuda --batch_size 1 --image_size 224 --hst_variant a2
 ```
 

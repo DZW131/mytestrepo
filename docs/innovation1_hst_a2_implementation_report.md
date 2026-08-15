@@ -10,7 +10,8 @@ A2 is the target-conditioned transition applied at stages 3, 2, and 1.
 Completed:
 
 - one independent transition module per target hierarchy;
-- zero-initialized learnable residual scale `rho`;
+- fixed official A2 initialization `rho_3=rho_2=rho_1=0.01`, while `rho`
+  remains learnable;
 - an explicit A1/A2 configuration and an A2 transition-disable control;
 - A1-equivalence, formula, shape, gradient, parameter-group, finite-value, and
   full-forward tests;
@@ -46,7 +47,7 @@ Linear(4d -> 2d) -> GELU -> Linear(2d -> d), d=256
 The residual update is:
 
 \[
-C_i=C_{i+1}+\rho_iT_i(u_i), \qquad \rho_i=0\text{ at initialization}.
+C_i=C_{i+1}+\rho_iT_i(u_i), \qquad \rho_i=0.01\text{ at initialization}.
 \]
 
 This is implemented by `StageSemanticTransition` in
@@ -78,13 +79,15 @@ The public switches are:
 |---|---:|---|---|
 | `hfrm` | n/a | n/a | unchanged public SSHR baseline |
 | `hst/a1` | disabled | identity | progressive correction-state diagnostic |
-| `hst/a2` | enabled | identity | target-conditioned stage transition |
+| `hst/a2` | enabled, `rho=0.01` | identity | target-conditioned stage transition |
 | `hst/a2 --no-hst_transition_enabled` | disabled | identity | strict A1 control through the A2 interface |
 
 `HSTConfig(variant="a1")` does not instantiate transition modules. This keeps
 the merged A1 parameter count and state-dict structure unchanged. A2 adds three
-independent transition blocks and exposes each `rho` through the existing
-rectifier-scalar logging path.
+independent transition blocks and exposes each learnable `rho` through the
+existing rectifier-scalar logging path. The official 0.01 initial value is a
+code constant rather than a training CLI option, so this readiness fix does not
+create a validation/test tuning dimension.
 
 ## 4. Files changed
 
@@ -95,7 +98,7 @@ rectifier-scalar logging path.
 | `network/hst/__init__.py` | public transition export |
 | `train_sshr.py` | A2 CLI/config plumbing and `rho` logging |
 | `tests/test_hst_a2.py` | A2 component and integration regression suite |
-| `tools/smoke_hst_a2.py` | dataset-free three-step training-path CUDA check |
+| `tools/smoke_hst_a2.py` | dataset-free ten-step optimization-readiness CUDA check |
 | `tools/profile_hst.py` | selectable A1/A2 efficiency profile |
 | `tools/check_pretrained_load.py` | selectable A1/A2 pretrained-load audit |
 
@@ -112,14 +115,17 @@ Command:
 python -m unittest discover -s tests -v
 ```
 
-Result on Windows CPU and the 5090 server: **18/18 passed** (the original eight
-A1 tests plus ten A2 tests).
+Result on Windows CPU and the 5090 server: **20/20 passed** (the original eight
+A1 tests plus twelve A2 tests).
 
 The A2 suite verifies:
 
 - `rho=0` returns the parent state with exact `torch.equal` equality;
 - the implemented residual update exactly matches the A2 formula;
-- zero-`rho` A2 produces the same correction-state progression as A1;
+- the official A2 initialization is exactly 0.01 while every semantic `gamma`
+  remains exactly zero;
+- after manually setting all `rho` values to zero, A2 produces the same
+  correction-state and rectified-feature progression as A1;
 - disabling A2 transitions remains A1-equivalent even if `rho` is manually
   made nonzero;
 - nonzero `rho` creates target-specific states using the correct stage target;
@@ -129,45 +135,51 @@ The A2 suite verifies:
 - full-network shapes, diagnostics, and outputs are finite;
 - the A1 total parameter count remains exactly `107,537,234`.
 
-## 6. CUDA smoke and zero-initialization behavior
+## 6. CUDA optimization-readiness smoke
 
 Environment:
 
 - NVIDIA GeForce RTX 5090 D v2, 24 GB;
 - Python 3.10.20;
 - PyTorch 2.11.0+cu128;
-- batch 2, 224x224 random inputs, three optimizer steps;
+- batch 2, 224x224 random inputs, ten optimizer steps;
 - no dataset access and no epoch training.
 
-Result:
+The earlier three-step review with nested `gamma=0` and `rho=0` showed inner
+transition/projector gradients around `1e-16`. The readiness patch keeps the
+SSHR semantic `gamma` at zero but initializes the three learnable `rho` values
+to 0.01. Transition MLP initialization is unchanged.
 
-- losses: `0.6959156`, `0.6937357`, `0.6931577`;
-- all outputs and observed gradients finite;
-- peak allocated CUDA memory: `1,760,631,296` bytes (about 1.64 GiB).
+Result: **readiness passed**. All three transition MLPs and all three target
+projectors had finite nonzero gradients at step 2. Their step-2 norms were
+`6.79e-9` to `7.63e-9` and `2.44e-9` to `4.59e-9`, respectively: about seven
+orders of magnitude above the original `1e-16` observation. All requested
+finite checks passed at every step. Peak allocated CUDA memory was
+`1,851,509,248` bytes (about 1.72 GiB).
 
-The observed activation sequence is important:
+Each triple below is ordered `stage3 / stage2 / stage1`. Values are sampled
+before the optimizer update for that step. “Relative update” is exactly
+`||rho_i * delta_C_i|| / ||C_parent||`.
 
-1. Step 1: zero-initialized semantic `gamma` receives gradient; gates,
-   transition scales, target projectors, and transition MLPs receive zero
-   effective gradient.
-2. Step 2: after `gamma` opens, gates and `rho` receive nonzero gradients;
-   transition MLPs and target projectors still receive zero gradient because
-   `rho` was zero for this forward.
-3. Step 3: after `rho` opens, transition MLPs and target projectors receive
-   finite nonzero gradients.
+| Step | gamma value | gamma grad | rho value | rho grad | MLP grad | target projector grad | relative update | Finite |
+|---:|---|---|---|---|---|---|---|:---:|
+| 1 | 0.00E+00 / 0.00E+00 / 0.00E+00 | 1.16E-03 / 8.56E-04 / 1.14E-03 | 1.00E-02 / 1.00E-02 / 1.00E-02 | 0.00E+00 / 0.00E+00 / 0.00E+00 | 0.00E+00 / 0.00E+00 / 0.00E+00 | 0.00E+00 / 0.00E+00 / 0.00E+00 | 2.48E-03 / 2.42E-03 / 2.39E-03 | Yes |
+| 2 | 1.16E-04 / -8.56E-05 / -1.14E-04 | 1.23E-03 / 7.76E-04 / 1.02E-03 | 1.00E-02 / 1.00E-02 / 1.00E-02 | 9.09E-09 / 2.13E-09 / 1.04E-08 | 7.37E-09 / 7.63E-09 / 6.79E-09 | 4.59E-09 / 3.57E-09 / 2.44E-09 | 2.48E-03 / 2.43E-03 / 2.39E-03 | Yes |
+| 3 | 2.28E-04 / -1.56E-04 / -2.07E-04 | 1.28E-03 / 7.03E-04 / 9.04E-04 | 1.00E-02 / 1.00E-02 / 1.00E-02 | 1.62E-08 / 4.23E-09 / 1.86E-08 | 1.35E-08 / 1.38E-08 / 1.23E-08 | 8.37E-09 / 6.46E-09 / 4.42E-09 | 2.48E-03 / 2.42E-03 / 2.39E-03 | Yes |
+| 4 | 3.33E-04 / -2.14E-04 / -2.81E-04 | 1.33E-03 / 6.55E-04 / 8.08E-04 | 1.00E-02 / 1.00E-02 / 1.00E-02 | 2.11E-08 / 7.02E-09 / 2.63E-08 | 1.84E-08 / 1.87E-08 / 1.66E-08 | 1.15E-08 / 8.77E-09 / 5.97E-09 | 2.48E-03 / 2.43E-03 / 2.39E-03 | Yes |
+| 5 | 4.29E-04 / -2.61E-04 / -3.40E-04 | 1.38E-03 / 5.93E-04 / 7.35E-04 | 1.00E-02 / 1.00E-02 / 1.00E-02 | 2.69E-08 / 7.16E-09 / 3.10E-08 | 2.24E-08 / 2.25E-08 / 2.00E-08 | 1.40E-08 / 1.06E-08 / 7.21E-09 | 2.48E-03 / 2.42E-03 / 2.39E-03 | Yes |
+| 6 | 5.16E-04 / -2.99E-04 / -3.86E-04 | 1.41E-03 / 5.54E-04 / 6.69E-04 | 1.00E-02 / 1.00E-02 / 1.00E-02 | 2.94E-08 / 1.16E-08 / 3.54E-08 | 2.58E-08 / 2.56E-08 / 2.28E-08 | 1.61E-08 / 1.20E-08 / 8.21E-09 | 2.48E-03 / 2.42E-03 / 2.40E-03 | Yes |
+| 7 | 5.92E-04 / -3.28E-04 / -4.22E-04 | 1.45E-03 / 5.12E-04 / 6.10E-04 | 1.00E-02 / 1.00E-02 / 1.00E-02 | 3.28E-08 / 9.89E-09 / 3.83E-08 | 2.83E-08 / 2.79E-08 / 2.48E-08 | 1.76E-08 / 1.30E-08 / 8.94E-09 | 2.48E-03 / 2.42E-03 / 2.39E-03 | Yes |
+| 8 | 6.55E-04 / -3.51E-04 / -4.49E-04 | 1.47E-03 / 4.77E-04 / 5.65E-04 | 1.00E-02 / 1.00E-02 / 1.00E-02 | 3.27E-08 / 1.08E-08 / 4.10E-08 | 3.03E-08 / 2.96E-08 / 2.63E-08 | 1.88E-08 / 1.38E-08 / 9.50E-09 | 2.47E-03 / 2.43E-03 / 2.39E-03 | Yes |
+| 9 | 7.05E-04 / -3.67E-04 / -4.68E-04 | 1.49E-03 / 4.43E-04 / 5.01E-04 | 1.00E-02 / 1.00E-02 / 1.00E-02 | 3.59E-08 / 1.27E-08 / 4.26E-08 | 3.18E-08 / 3.09E-08 / 2.74E-08 | 1.98E-08 / 1.45E-08 / 9.87E-09 | 2.47E-03 / 2.42E-03 / 2.39E-03 | Yes |
+| 10 | 7.40E-04 / -3.77E-04 / -4.80E-04 | 1.51E-03 / 4.39E-04 / 4.91E-04 | 1.00E-02 / 1.00E-02 / 1.00E-02 | 3.79E-08 / 1.27E-08 / 4.50E-08 | 3.27E-08 / 3.16E-08 / 2.81E-08 | 2.04E-08 / 1.48E-08 / 1.01E-08 | 2.48E-03 / 2.42E-03 / 2.38E-03 | Yes |
 
-The path is connected in FP32, but its initial inner-branch gradients are very
-small. At step 3, target-projector norms were approximately
-`4.95e-17` to `2.23e-16`, and transition-MLP norms were approximately
-`1.56e-16` to `6.58e-16`. The learned `rho` values entering step 3 were only
-about `1.53e-10` to `7.23e-10` in magnitude.
-
-This is a genuine optimization risk caused by the specified nested zero gates
-(`gamma=0` and `rho=0`), not a functional-disconnection bug. The implementation
-does not alter either initialization because the A2 specification requires
-both. A future training run must log `rho`, transition residual norms, and
-correction-state similarity to determine whether the transitions learn at a
-useful rate.
+The transition remains a small residual perturbation: the relative update is
+stable around 0.238% to 0.248% over all stages and steps. `rho` remains close
+to 0.01 through step 10 and is learnable. The raw per-step JSON, including
+pre/post-update scalar values and every finite sub-check, is stored at
+`audit/results/hst_a2_rho001_cuda_smoke.json` (SHA256
+`d9608662dfadfb5841ebb376bf683f68e70b61f888c6ae2c811d1d9e483baf8b`).
 
 ## 7. Parameters, FLOPs, memory, and runtime
 
@@ -209,7 +221,8 @@ A2 CUDA verification:
 
 ```bash
 python -m unittest discover -s tests -v
-python tools/smoke_hst_a2.py --device cuda --batch_size 2 --image_size 224
+python tools/smoke_hst_a2.py --device cuda --batch_size 2 --image_size 224 \
+  --steps 10 --output_json audit/results/hst_a2_rho001_cuda_smoke.json
 python tools/profile_hst.py --device cuda --batch_size 1 --image_size 224 \
   --warmup 20 --iterations 100 --hst_variant a2
 ```
@@ -237,8 +250,8 @@ evidence yet because full training was intentionally skipped. Therefore this
 milestone proves correctness, compatibility, and cost; it does not prove the
 scientific hypothesis.
 
-The next scientifically valid comparison is A1 versus A2 versus the same A0
-baseline under one frozen BCSS protocol. A3 must remain blocked until A2 has
-been trained and reviewed. During A2 training, the nested-zero optimization
-risk should be assessed before attributing a neutral result to the transition
-hypothesis.
+The A2 optimization-readiness check now passes: the transition path is active
+by step 2 at a materially larger numerical scale while the actual correction
+remains a small residual. The next scientifically valid comparison is A1 versus
+A2 versus the same A0 baseline under one frozen BCSS protocol. A3 must remain
+blocked until A2 has been trained and reviewed.
