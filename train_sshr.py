@@ -72,6 +72,8 @@ def get_model_kwargs(args):
             'variant': getattr(args, 'hst_variant', 'a1'),
             'latent_dim': getattr(args, 'hst_latent_dim', 256),
             'context_kernel': getattr(args, 'hst_context_kernel', 15),
+            'transition_enabled': getattr(args, 'hst_transition_enabled', None),
+            'hli_mode': getattr(args, 'hst_hli_mode', 'identity'),
         }
     return model_kwargs
 
@@ -96,7 +98,7 @@ def get_rectifier_scalars(model):
             'gamma_sem_stage3': model.hfrm_28_2.gamma_veto.item(),
             'gamma_ctx_stage3': model.hfrm_28_2.gamma_context.item(),
         }
-    return {
+    scalars = {
         **{
             f'gamma_sem_{stage}': gamma.item()
             for stage, gamma in model.hst_rectifier.gamma_sem.items()
@@ -106,6 +108,14 @@ def get_rectifier_scalars(model):
             for stage, gamma in model.hst_rectifier.gamma_ctx.items()
         },
     }
+    if hasattr(model.hst_rectifier, 'transitions'):
+        scalars.update(
+            {
+                f'rho_{stage}': transition.rho.item()
+                for stage, transition in model.hst_rectifier.transitions.items()
+            }
+        )
+    return scalars
 
 def save_json(path, payload):
     with open(path, 'w', encoding='utf-8') as output_file:
@@ -417,9 +427,16 @@ if __name__ == '__main__':
     parser.add_argument("--max_epoches", default=21, type=int)
     parser.add_argument("--network", default="network.resnet38_cls", type=str)
     parser.add_argument("--rectifier", default="hfrm", choices=["hfrm", "hst"])
-    parser.add_argument("--hst_variant", default="a1", choices=["a1"])
+    parser.add_argument("--hst_variant", default="a1", choices=["a1", "a2"])
     parser.add_argument("--hst_latent_dim", default=256, type=int)
     parser.add_argument("--hst_context_kernel", default=15, type=int)
+    parser.add_argument(
+        "--hst_transition_enabled",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="Override the variant default (A1=false, A2=true).",
+    )
+    parser.add_argument("--hst_hli_mode", default="identity", choices=["identity"])
     parser.add_argument("--lr", default=0.01, type=float)
     parser.add_argument("--num_workers", default=8, type=int)
     parser.add_argument("--wt_dec", default=5e-4, type=float)

@@ -26,6 +26,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("weights", type=Path)
     parser.add_argument("--rectifier", default="hst", choices=["hfrm", "hst"])
+    parser.add_argument("--hst_variant", default="a1", choices=["a1", "a2"])
     args = parser.parse_args()
 
     weights_path = args.weights.expanduser().resolve()
@@ -33,7 +34,10 @@ def main():
         raise FileNotFoundError(weights_path)
 
     converted = convert_mxnet_to_torch(str(weights_path))
-    model = Net(n_class=4, rectifier_type=args.rectifier)
+    model_kwargs = {"rectifier_type": args.rectifier}
+    if args.rectifier == "hst":
+        model_kwargs["hst_config"] = {"variant": args.hst_variant}
+    model = Net(n_class=4, **model_kwargs)
     incompatible = model.load_state_dict(converted, strict=False)
 
     rectifier_prefixes = (
@@ -56,6 +60,7 @@ def main():
         "weights_size_bytes": weights_path.stat().st_size,
         "weights_sha256": sha256(weights_path),
         "rectifier": args.rectifier,
+        "hst_variant": args.hst_variant if args.rectifier == "hst" else None,
         "converted_key_count": len(converted),
         "missing_keys": incompatible.missing_keys,
         "missing_backbone_keys": missing_backbone,
