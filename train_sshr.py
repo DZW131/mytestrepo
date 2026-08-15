@@ -4,6 +4,7 @@ import numpy as np
 import argparse
 import importlib
 import json
+import subprocess
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -62,6 +63,53 @@ def seed_worker(worker_id):
 
 def get_checkpoint_path(args):
     return os.path.join(args.save_folder, args.checkpoint_name)
+
+def get_model_kwargs(args):
+    rectifier_type = getattr(args, 'rectifier', 'hfrm').lower()
+    model_kwargs = {'rectifier_type': rectifier_type}
+    if rectifier_type == 'hst':
+        model_kwargs['hst_config'] = {
+            'variant': getattr(args, 'hst_variant', 'a1'),
+            'latent_dim': getattr(args, 'hst_latent_dim', 256),
+            'context_kernel': getattr(args, 'hst_context_kernel', 15),
+        }
+    return model_kwargs
+
+def get_git_commit():
+    try:
+        return subprocess.check_output(
+            ['git', 'rev-parse', 'HEAD'],
+            cwd=os.path.dirname(os.path.abspath(__file__)),
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except (OSError, subprocess.CalledProcessError):
+        return None
+
+def get_rectifier_scalars(model):
+    if model.rectifier_type == 'hfrm':
+        return {
+            'gamma_sem_stage1': model.hfrm_56.gamma_veto.item(),
+            'gamma_ctx_stage1': model.hfrm_56.gamma_context.item(),
+            'gamma_sem_stage2': model.hfrm_28_1.gamma_veto.item(),
+            'gamma_ctx_stage2': model.hfrm_28_1.gamma_context.item(),
+            'gamma_sem_stage3': model.hfrm_28_2.gamma_veto.item(),
+            'gamma_ctx_stage3': model.hfrm_28_2.gamma_context.item(),
+        }
+    return {
+        **{
+            f'gamma_sem_{stage}': gamma.item()
+            for stage, gamma in model.hst_rectifier.gamma_sem.items()
+        },
+        **{
+            f'gamma_ctx_{stage}': gamma.item()
+            for stage, gamma in model.hst_rectifier.gamma_ctx.items()
+        },
+    }
+
+def save_json(path, payload):
+    with open(path, 'w', encoding='utf-8') as output_file:
+        json.dump(payload, output_file, indent=2, sort_keys=True)
 
 def get_infer_thr(args):
     return args.infer_thr if args.infer_thr is not None else None
@@ -152,8 +200,13 @@ def train_phase(args):
     global time_test
 
     set_seed(args.seed)
-    model = getattr(importlib.import_module(args.network), 'Net')(n_class=args.n_class).cuda()
-    model_cam = getattr(importlib.import_module(args.network), 'Net_CAM')(n_class=args.n_class).cuda()
+    model_kwargs = get_model_kwargs(args)
+    model = getattr(importlib.import_module(args.network), 'Net')(
+        n_class=args.n_class, **model_kwargs
+    ).cuda()
+    model_cam = getattr(importlib.import_module(args.network), 'Net_CAM')(
+        n_class=args.n_class, **model_kwargs
+    ).cuda()
     model_cam.eval()
     
 
@@ -190,6 +243,36 @@ def train_phase(args):
     ]
 
     optimizer = torchutils.PolyOptimizer(optim_params, lr=args.lr, weight_decay=args.wt_dec, max_step=max_step)
+
+    experiment_manifest = {
+        'arguments': vars(args),
+        'model_kwargs': model_kwargs,
+        'git_commit': get_git_commit(),
+        'torch_version': torch.__version__,
+        'cuda_version': torch.version.cuda,
+        'parameter_count': sum(parameter.numel() for parameter in model.parameters()),
+        'trainable_parameter_count': sum(
+            parameter.numel()
+            for parameter in model.parameters()
+            if parameter.requires_grad
+        ),
+        'optimizer_param_groups': [
+            {
+                key: value
+                for key, value in group.items()
+                if key != 'params'
+            }
+            for group in optimizer.param_groups
+        ],
+        'checkpoint_selection': 'validation_mean_iou_only',
+        'test_usage': 'reporting_only',
+    }
+    os.makedirs(args.save_folder, exist_ok=True)
+    save_json(
+        os.path.join(args.save_folder, 'experiment_config.json'),
+        experiment_manifest,
+    )
+    print('[ExperimentConfig]', json.dumps(experiment_manifest, sort_keys=True), flush=True)
     
     if args.weights[-7:] == '.params':
         weights_dict = importlib.import_module('network.resnet38d').convert_mxnet_to_torch(args.weights)
@@ -206,6 +289,8 @@ def train_phase(args):
     for ep in range(args.max_epoches):
         model.train()
         ep_count = ep_EM = ep_acc = 0
+        ep_loss_sum = 0.0
+        ep_batch_count = 0
         
 
         
@@ -236,6 +321,8 @@ def train_phase(args):
                 ep_acc += compute_acc(pass_cls, true_cls)
             
             avg_meter.add({'loss_cls': loss_cls.item(), 'loss_adapt': loss_adapt_val.item()})
+            ep_loss_sum += loss_cls.item()
+            ep_batch_count += 1
             
             optimizer.zero_grad()
             loss.backward()
@@ -262,26 +349,53 @@ def train_phase(args):
         if args.eval_every > 0 and ((ep + 1) % args.eval_every == 0):
             state_dict = None if args.save_checkpoints else model.state_dict()
             val_score = test_phase(args, dataroot=args.valroot, split_name='val', checkpoint_path=checkpoint_path, state_dict=state_dict)
-            test_score = test_phase(args, dataroot=args.testroot, split_name='test', checkpoint_path=checkpoint_path, state_dict=state_dict)
             val_miou = val_score.get('Mean IoU') if val_score is not None else None
+            is_best_val = (
+                val_miou is not None
+                and (best_val_miou is None or val_miou > best_val_miou)
+            )
+            if is_best_val:
+                best_val_miou = val_miou
+                if args.save_checkpoints:
+                    torch.save(
+                        model.state_dict(),
+                        os.path.join(args.save_folder, 'best_val.pth'),
+                    )
+
+            # Test is evaluated only for comparable reporting. It is deliberately
+            # executed after validation-only checkpoint selection and cannot
+            # influence best_val.pth or any hyperparameter choice.
+            test_score = test_phase(args, dataroot=args.testroot, split_name='test', checkpoint_path=checkpoint_path, state_dict=state_dict)
             test_miou = test_score.get('Mean IoU') if test_score is not None else None
             eval_record = {
+                'seed': args.seed,
                 'epoch': ep + 1,
+                'rectifier': model.rectifier_type,
+                'train_loss': ep_loss_sum / max(ep_batch_count, 1),
+                'train_exact_match': ep_EM / max(ep_count, 1),
+                'train_accuracy': ep_acc / max(ep_count, 1),
+                'lr': optimizer.param_groups[0]['lr'],
                 'val_mean_iou': val_miou,
                 'test_mean_iou': test_miou,
                 'val_mean_dice': val_score.get('Mean Dice') if val_score is not None else None,
                 'test_mean_dice': test_score.get('Mean Dice') if test_score is not None else None,
+                'is_best_val': is_best_val,
+                'rectifier_scalars': get_rectifier_scalars(model),
             }
             eval_history.append(eval_record)
             print('[Eval]', json.dumps(eval_record, sort_keys=True), flush=True)
-            if val_miou is not None and (best_val_miou is None or val_miou > best_val_miou):
-                best_val_miou = val_miou
+            save_json(
+                os.path.join(args.save_folder, 'eval_history.json'),
+                eval_history,
+            )
 
     return {'best_val_miou': best_val_miou, 'eval_history': eval_history}
 
 
 def test_phase(args, dataroot=None, split_name='test', checkpoint_path=None, state_dict=None):
-    model = getattr(importlib.import_module(args.network), 'Net_CAM')(n_class=args.n_class)
+    model = getattr(importlib.import_module(args.network), 'Net_CAM')(
+        n_class=args.n_class, **get_model_kwargs(args)
+    )
     model = model.cuda()
     if dataroot is None:
         dataroot = args.testroot
@@ -302,6 +416,10 @@ if __name__ == '__main__':
     parser.add_argument("--batch_size", default=20, type=int)
     parser.add_argument("--max_epoches", default=21, type=int)
     parser.add_argument("--network", default="network.resnet38_cls", type=str)
+    parser.add_argument("--rectifier", default="hfrm", choices=["hfrm", "hst"])
+    parser.add_argument("--hst_variant", default="a1", choices=["a1"])
+    parser.add_argument("--hst_latent_dim", default=256, type=int)
+    parser.add_argument("--hst_context_kernel", default=15, type=int)
     parser.add_argument("--lr", default=0.01, type=float)
     parser.add_argument("--num_workers", default=8, type=int)
     parser.add_argument("--wt_dec", default=5e-4, type=float)
@@ -315,7 +433,7 @@ if __name__ == '__main__':
     parser.add_argument("--img_size", default=224, type=int)
 
     parser.add_argument("--save_folder", default='checkpoints', type=str)
-    parser.add_argument("--checkpoint_name", default='stage1_last.pth', type=str)
+    parser.add_argument("--checkpoint_name", default='last.pth', type=str)
     parser.add_argument("--seed", default=42, type=int)
     parser.add_argument("--eval_every", default=1, type=int)
     parser.add_argument("--infer_thr", default=None, type=float)
