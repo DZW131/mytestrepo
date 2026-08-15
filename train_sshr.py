@@ -128,6 +128,13 @@ def save_json(path, payload):
     with open(path, 'w', encoding='utf-8') as output_file:
         json.dump(payload, output_file, indent=2, sort_keys=True)
 
+def is_validation_improvement(val_miou, best_val_miou):
+    """Return a JSON-serializable validation-only checkpoint decision."""
+    return bool(
+        val_miou is not None
+        and (best_val_miou is None or val_miou > best_val_miou)
+    )
+
 def get_infer_thr(args):
     return args.infer_thr if args.infer_thr is not None else None
 
@@ -367,10 +374,7 @@ def train_phase(args):
             state_dict = None if args.save_checkpoints else model.state_dict()
             val_score = test_phase(args, dataroot=args.valroot, split_name='val', checkpoint_path=checkpoint_path, state_dict=state_dict)
             val_miou = val_score.get('Mean IoU') if val_score is not None else None
-            is_best_val = (
-                val_miou is not None
-                and (best_val_miou is None or val_miou > best_val_miou)
-            )
+            is_best_val = is_validation_improvement(val_miou, best_val_miou)
             if is_best_val:
                 best_val_miou = val_miou
                 if args.save_checkpoints:
